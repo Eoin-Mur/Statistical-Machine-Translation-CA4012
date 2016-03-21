@@ -45,3 +45,6 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+/Labs/
+/twitter.properties
+twitter4j-4.0.4/*
