@@ -1,9 +1,11 @@
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.Properties;
-
 import twitter4j.*;
-import twitter4j.auth.*;
 import twitter4j.conf.*;
+
 public class TwitterStreamBot {
 	public static void main(String [] args)
 	{
@@ -12,9 +14,47 @@ public class TwitterStreamBot {
 		{
 			//calls this function when a tweet is received
 			//This is where we will have our code to detect possible parallel data in a tweet
+			//probable more efficient to store the tweets for processing later as i am not sure
+			//how the listener will handle a race case where we are processing a tweet and another status 
+			//fires.
+			
 			public void onStatus(Status status)
 			{
 				System.out.println("@"+status.getUser().getScreenName()+"-"+status.getText());
+				try
+				{
+					Properties config = new Properties();
+					try
+					{
+						FileInputStream in = new FileInputStream("twitter.properties");
+						config.load(in);
+					}
+					catch(Exception e)
+					{
+						System.out.println("unable to load properties file");
+						System.exit(-1);
+					}
+					
+					ConfigurationBuilder cb = new ConfigurationBuilder();
+					cb.setDebugEnabled(true)
+						.setOAuthConsumerKey(config.getProperty("consumer-key"))
+						.setOAuthConsumerSecret(config.getProperty("consumer-key-secret"))
+						.setOAuthAccessToken(config.getProperty("access-token"))
+						.setOAuthAccessTokenSecret(config.getProperty("access-token-secret"));
+					
+					Twitter twitter = new TwitterFactory(cb.build()).getInstance();
+					Status reply = twitter.updateStatus("@"+status.getUser().getScreenName()+" i hear you");
+					System.out.println("Sent::"+reply);
+					
+					PrintWriter pw = new PrintWriter(new FileOutputStream(new File("Data/crawled.tweets"),true));
+					pw.println("@"+status.getUser().getScreenName()+"-"+status.getText());
+					pw.close();
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+				
 			}
 			//have to overide this methods as with the interface documentation
 			public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {}
@@ -66,7 +106,9 @@ public class TwitterStreamBot {
 			//add out listener
 			twitterStream.addListener(listener);
 			//call the sample stream
-			twitterStream.sample();
+			twitterStream.filter("twanslate");
+			
+			//System.out.println("Crawling Tweets");
 		}
 		catch(Exception e)
 		{
