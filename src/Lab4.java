@@ -47,18 +47,25 @@ public class Lab4
 	public static int wordCount(String sentance, String word, int n)
 	{
 
-		String [] words = sentance.split(" ");
 		String prevWord = "";
-		if(Arrays.asList(words).indexOf(word) - n < 0)
-			prevWord = "";
-		else
-		{
-			for(int i = n-1; i !=0 ; i--)
+		//if(Arrays.asList(sentance.split(" ")).indexOf(word) - n < 0)
+		//	prevWord = "";
+		//else
+		//{
+			for(int i = 1; i !=n ; i++)
 			{
-				prevWord = prevWord + words[(Arrays.asList(words).indexOf(word))-i] + " ";
+				if((Arrays.asList(sentance.split(" ")).indexOf(word))-i < 0)
+				{
+					prevWord = prevWord + " ";
+					break;
+				}
+				prevWord = prevWord 
+					+ sentance.split(" ")[(Arrays.asList(sentance.split(" ")).indexOf(word))-i] 
+					+ " ";
+				System.out.println(prevWord);
 			}
 			prevWord = prevWord.substring(0, prevWord.length()-1);
-		}
+		//}
 
 
 		System.out.println("N: "+n);
@@ -72,20 +79,43 @@ public class Lab4
 		}
 		System.out.println("\tcount("+word+"|"+prevWord+") = "+count);
 
-		int count2 = 0;
-		nGrams = sentanceToNGrams(sentance, n-1);
+		int wCount = wWordCount(sentance, word, n);
+		
+		System.out.println("\tcount("+word+"| W ) = "+wCount);
+		if(wCount == 0 ) return 0;
+		return count/wCount;
+	}
+
+	public static int wWordCount(String sentance, String word, int n)
+	{
+
+		String prevWord = "";
+		if(Arrays.asList(sentance.split(" ")).indexOf(word) - n < 0)
+			prevWord = "";
+		else
+		{
+			for(int i = n-1; i !=0 ; i--)
+			{
+				prevWord = prevWord 
+					+ sentance.split(" ")[(Arrays.asList(sentance.split(" ")).indexOf(word))-i] 
+					+ " ";
+			}
+			prevWord = prevWord.substring(0, prevWord.length()-1);
+		}
+
+		int count = 0;
+
+		List<String> nGrams = sentanceToNGrams(sentance, n-1);
 		for(int w = 0; w < nGrams.size(); w ++)
 		{
 			List<String> nGrams2 = sentanceToNGrams(sentance,n);
 			for(int j = 0; j < nGrams2.size(); j ++)
 			{
 				if(nGrams2.get(j).equals(nGrams.get(w)+" "+word))
-					count2 ++;
+					count ++;
 			}	
 		}
-		System.out.println("\tcount("+word+"| W ) = "+count2);
-		if(count2 == 0 ) return 0;
-		return count/count2;
+		return count;
 	}
 
 	//public static List<String> allCounts(String sentance)
@@ -99,7 +129,7 @@ public class Lab4
 
 		for(int n = 2; n <= 4; n++)
 		{
-			System.out.println("\tcount(mat)= "+wordCount("cat sat on the mat", "mat",n));
+			System.out.println("\tcount(mat)= "+wordCount("cat sat on the mat", "on",n));
 		}
 
 	}	

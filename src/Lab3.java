@@ -1,3 +1,4 @@
+//MT Evaluation
 import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -69,15 +70,35 @@ public class Lab3
 		return (totalClipped / totalNgram);
 	}
 
-	//TODO: need to write evaluate function
-	//public static double evaluateTranslation(String trans, String ref)
-	//{
+	public static double precisionProduct(String trans, String ref, int i)
+	{
+		double x = 1;
+		for(int n = 1; n <= i; n++)
+		{
+			x = x * percision(trans,ref,n);
+		}
+		System.out.println(x);
+		return x;
+	}
 
-	//} 
+	public static double brevity(String trans, String ref)
+	{
+		double x = trans.split(" ").length / ref.split(" ").length;
+		System.out.println(x);
+		if(x > 1.0) return 1.0;
+		return x;
+	}
+
+	//TODO: need to write evaluate function
+	public static double evaluateTranslation(String trans, String ref)
+	{
+		return brevity(trans,ref)*Math.pow(precisionProduct(trans,ref,4),0.25);
+	} 
 
 	public static void main(String [] args)
 	{
-		System.out.println(percision("the cat is in the hat","the cat is on the mat",Integer.parseInt(args[0])));
+		System.out.println(evaluateTranslation(args[0],args[1]));
+		//System.out.println(percision("the cat is in the hat","the cat is on the mat",Integer.parseInt(args[0])));
 		//sentanceToNGrams("cat sat on the mat", Integer.parseInt(args[0]));
 	}
 }
