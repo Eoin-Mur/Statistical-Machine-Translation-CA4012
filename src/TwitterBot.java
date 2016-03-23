@@ -3,7 +3,7 @@ import java.util.List;
 import java.util.Properties;
 
 import twitter4j.*;
-import twitter4j.auth.*;
+import twitter4j.conf.ConfigurationBuilder;
 
 //using he twiter4j library
 public class TwitterBot {
@@ -31,32 +31,58 @@ public class TwitterBot {
 		return tweets;
 	}
 	
+	public static Status Reply(Twitter twitter, String user, String text)
+	{
+		Status status = null;
+		try
+		{
+			status =  twitter.updateStatus(user+text);
+	
+		}
+		catch(TwitterException e)
+		{
+			e.printStackTrace();
+		}
+	
+		return  status;
+	}
+	
 	public static void main(String [] args)
 	{
 		System.out.println("Running");
 		Twitter twitter = null;
+		
 		try
-		{
-			twitter = new TwitterFactory().getInstance();
-			
+		{	
+			//We need to pass our properties to a configuration builder
+			//the reason being when just passing them directly with the method
+			//twitterStream.setOAuthConsumer(); it can cause an error saying the key/secret is already set.
+			//as per the documentation this is the correct way to pass configuration settings
 			Properties config = new Properties();
 			FileInputStream in = new FileInputStream("twitter.properties");
 			config.load(in);
 			
-			AccessToken accessToken = new AccessToken(config.getProperty("access-token"), config.getProperty("access-token-secret"));
-			twitter.setOAuthConsumer(config.getProperty("consumer-key"), config.getProperty("consumer-key-secret"));
-			twitter.setOAuthAccessToken(accessToken);
+			ConfigurationBuilder cb = new ConfigurationBuilder();
+			cb.setDebugEnabled(true)
+				.setOAuthConsumerKey(config.getProperty("consumer-key"))
+				.setOAuthConsumerSecret(config.getProperty("consumer-key-secret"))
+				.setOAuthAccessToken(config.getProperty("access-token"))
+				.setOAuthAccessTokenSecret(config.getProperty("access-token-secret"));
+			
+			twitter = new TwitterFactory(cb.build()).getInstance();
+			
 		}
 		catch(Exception e)
 		{
-			System.out.println("Unable to load Twitter properties ");
-			System.exit(-1);
+			e.printStackTrace();
 		}
 		
 		List<Status> tweets = searchTweets(twitter,"#twanslate");
 		for(Status tweet : tweets)
 		{
 			System.out.println("@"+tweet.getUser().getScreenName()+"-"+tweet.getText());
+			System.out.println("Replying with "+
+					Reply(twitter, "@"+tweet.getUser(),tweet.getText()+"I read you load on clear").getText());
 		}
 	}
 }
