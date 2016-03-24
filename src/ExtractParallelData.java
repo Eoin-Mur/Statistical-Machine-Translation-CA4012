@@ -1,3 +1,4 @@
+import java.awt.Point;
 
 public class ExtractParallelData {
 
@@ -16,10 +17,6 @@ public class ExtractParallelData {
 	
 	n = 8
 	All possible spans:
-	1	Ss([1,3],[3,5] | x)
-	1 	Ss([1,3],[3,6] | x) 
-	2	Ss([1,3],[3,7] | x)  
-	3	Ss([1,3],[3,8] | x)
 	4	Ss([1,3],[4,6] | x)
 	5  	Ss([1,3],[4,7] | x)
 	6	Ss([1,3],[4,8] | x)
@@ -33,21 +30,42 @@ public class ExtractParallelData {
 	14	Ss([2,4],[6,8] | x)
 	15	Ss([3,5],[6,8] | x)
 	
-	
-	
-	
-	
 	*/
-	
-	
-	
-	public static double calcualteSpanSigma(String x)
+	public static double spanScore(String [] x, Point lSpan, Point rSpan)
 	{
-		
+		return (lSpan.y - lSpan.x + 1)+(rSpan.y - rSpan.x + 1) / calculateSpanSigma(x);
+	}
+	
+	public static double calculateSpanSigma(String [] x)
+	{
+		double sigma = 0.0;
+		int n = x.length;
+		//initalilise our variables to n to allow for us to set them in the loops..
+		int p = n,q = n,u = n,v = n;
+		for(p = 1; p <= (q - 2); p++)
+		{
+			for(q = p + 2; q <= (u - 2); q++)
+			{
+				for(u = q + 1; u <= (v-2); u++)
+				{
+					for(v = u + 2; v <= n; v++)
+					{
+						//System.out.println("Ss(["+p+","+q+"],["+u+","+v+"] | x)");
+						sigma = sigma + (q - p + 1) + (v - u + 1);
+					}
+				}
+			}
+		}
+		return sigma;
 	}
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		String s = "the house is small das haus ist klein";
+		String [] x = s.split(" ");
+		System.out.println(
+				"Sigma (q-p+1)+(v-u+1) for all possible spans of: \n'"+s+"'\n= "+
+				calculateSpanSigma(x)
+		);
 
 	}
 
