@@ -6,18 +6,14 @@ import java.util.Properties;
 import twitter4j.*;
 import twitter4j.conf.*;
 
+>>>>>>> origin/master
 public class TwitterStreamBot {
 	public static void main(String [] args)
 	{
 		//add a listener which listens for new tweets
 		StatusListener listener = new StatusListener()
 		{
-			//calls this function when a tweet is received
-			//This is where we will have our code to detect possible parallel data in a tweet
-			//probable more efficient to store the tweets for processing later as i am not sure
-			//how the listener will handle a race case where we are processing a tweet and another status 
-			//fires.
-			
+
 			public void onStatus(Status status)
 			{
 				System.out.println("@"+status.getUser().getScreenName()+"-"+status.getText());
@@ -54,15 +50,14 @@ public class TwitterStreamBot {
 				{
 					e.printStackTrace();
 				}
-				
 			}
 			//have to overide this methods as with the interface documentation
 			public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {}
-	        public void onTrackLimitationNotice(int numberOfLimitedStatuses) {}
-	        public void onException(Exception ex) 
-	        {
-	            ex.printStackTrace();
-	        }
+      public void onTrackLimitationNotice(int numberOfLimitedStatuses) {}
+      public void onException(Exception ex) 
+      {
+          ex.printStackTrace();
+      }
 			public void onScrubGeo(long arg0, long arg1) {}	
 			public void onStallWarning(StallWarning arg0) {}
 		};
