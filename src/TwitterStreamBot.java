@@ -1,6 +1,6 @@
-//import java.io.File;
-//import java.io.FileOutputStream;
-//import java.io.PrintWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 
 import java.io.FileInputStream;
 import java.util.Properties;
@@ -22,8 +22,8 @@ public class TwitterStreamBot {
 				
 				String text;
 				//get the users twitter name who sent the tweet with the hashtag
-				String user = status.getUser().getScreenName();
-				
+				String user = "@"+status.getUser().getScreenName();
+				long id = status.getId();
 				//get any quoted tweets ie. the user retweeted a tweet and then added the hashtag to it
 				Status quoted = status.getQuotedStatus();
 				//if their was a quoted tweet in it.
@@ -39,7 +39,7 @@ public class TwitterStreamBot {
 				}
 				
 				//print to the screen the user we just read and their message
-				System.out.println("@"+user+"-"+text);
+				System.out.println(user+"-"+text);
 				
 				//TODO:MOSES INTERFACE!
 				//interface with moses and send the text to be translated to english.
@@ -73,13 +73,14 @@ public class TwitterStreamBot {
 					Twitter twitter = new TwitterFactory(cb.build()).getInstance();
 					
 					//reply to the use with the translation
-					Status reply = twitter.updateStatus("@"+status.getUser().getScreenName()+" i hear you");
+					Status reply = twitter.updateStatus(user+" i hear you");
 					System.out.println("Sent reply tweet:: "+reply);
+					//TODO:Add call to send direct message with link to user eval form
 					
 					
-					//PrintWriter pw = new PrintWriter(new FileOutputStream(new File("Data/crawled.tweets"),true));
-					//pw.println("@"+status.getUser().getScreenName()+"-"+status.getText());
-					//pw.close();
+					PrintWriter pw = new PrintWriter(new FileOutputStream(new File("Data/recived.tweets"),true));
+					pw.println(user+"    "+id+"    "+text+"    "+translation);
+					pw.close();
 				}
 				catch(Exception e)
 				{
