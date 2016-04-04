@@ -1,24 +1,55 @@
-import java.io.File;
+//import java.io.File;
+//import java.io.FileOutputStream;
+//import java.io.PrintWriter;
+
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
 import java.util.Properties;
 import twitter4j.*;
 import twitter4j.conf.*;
 
->>>>>>> origin/master
+
 public class TwitterStreamBot {
 	public static void main(String [] args)
 	{
 		//add a listener which listens for new tweets
 		StatusListener listener = new StatusListener()
 		{
-
+			
+			//on reciving a status from our listener
 			public void onStatus(Status status)
 			{
-				System.out.println("@"+status.getUser().getScreenName()+"-"+status.getText());
+				//System.out.println("@"+status.getUser().getScreenName()+"-"+status.getText());
+				
+				String text;
+				//get the users twitter name who sent the tweet with the hashtag
+				String user = status.getUser().getScreenName();
+				
+				//get any quoted tweets ie. the user retweeted a tweet and then added the hashtag to it
+				Status quoted = status.getQuotedStatus();
+				//if their was a quoted tweet in it.
+				if(quoted != null) 
+				{
+					//get the text from the quoted tweet
+					text = quoted.getText();
+				}
+				//other wise it was just a normal tweet so get the text
+				else
+				{
+					text = status.getText();
+				}
+				
+				//print to the screen the user we just read and their message
+				System.out.println("@"+user+"-"+text);
+				
+				//TODO:MOSES INTERFACE!
+				//interface with moses and send the text to be translated to english.
+				
+				String translation = text;//just use text untill we get the interface up.
+			
+				
 				try
 				{
+					//load our keys
 					Properties config = new Properties();
 					try
 					{
@@ -31,6 +62,7 @@ public class TwitterStreamBot {
 						System.exit(-1);
 					}
 					
+					//build a new twitter api connection with our credentals
 					ConfigurationBuilder cb = new ConfigurationBuilder();
 					cb.setDebugEnabled(true)
 						.setOAuthConsumerKey(config.getProperty("consumer-key"))
@@ -39,25 +71,30 @@ public class TwitterStreamBot {
 						.setOAuthAccessTokenSecret(config.getProperty("access-token-secret"));
 					
 					Twitter twitter = new TwitterFactory(cb.build()).getInstance();
-					Status reply = twitter.updateStatus("@"+status.getUser().getScreenName()+" i hear you");
-					System.out.println("Sent::"+reply);
 					
-					PrintWriter pw = new PrintWriter(new FileOutputStream(new File("Data/crawled.tweets"),true));
-					pw.println("@"+status.getUser().getScreenName()+"-"+status.getText());
-					pw.close();
+					//reply to the use with the translation
+					Status reply = twitter.updateStatus("@"+status.getUser().getScreenName()+" i hear you");
+					System.out.println("Sent reply tweet:: "+reply);
+					
+					
+					//PrintWriter pw = new PrintWriter(new FileOutputStream(new File("Data/crawled.tweets"),true));
+					//pw.println("@"+status.getUser().getScreenName()+"-"+status.getText());
+					//pw.close();
 				}
 				catch(Exception e)
 				{
 					e.printStackTrace();
 				}
+				
+
 			}
 			//have to overide this methods as with the interface documentation
 			public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {}
-      public void onTrackLimitationNotice(int numberOfLimitedStatuses) {}
-      public void onException(Exception ex) 
-      {
-          ex.printStackTrace();
-      }
+		    public void onTrackLimitationNotice(int numberOfLimitedStatuses) {}
+		    public void onException(Exception ex) 
+		    {
+		          ex.printStackTrace();
+		    }
 			public void onScrubGeo(long arg0, long arg1) {}	
 			public void onStallWarning(StallWarning arg0) {}
 		};
@@ -110,7 +147,5 @@ public class TwitterStreamBot {
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		
-	}
-		
+	}	
 }

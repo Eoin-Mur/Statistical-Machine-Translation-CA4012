@@ -6,11 +6,11 @@ import java.util.Scanner;
 //Word Alignment
 public class Lab5
 {
-	public NUM_SENTENCES = 1000;
+	public static final int NUM_SENTENCES = 1000;
 
 	public static List<List<String>> biText(String fData, String eData)
 	{
-		List<List<String>> biText;
+		List<List<String>> biText = new ArrayList<List<String>>();
 		
 		ArrayList<String> fSents = new ArrayList<String>();
 		ArrayList<String> eSents = new ArrayList<String>();
@@ -44,7 +44,8 @@ public class Lab5
 	 		temp.add(eSents.get(i));
 	 		biText.add(temp);
 	 	}
-
+	 	fScanner.close();
+	 	eScanner.close();
 	 	return biText;
 
 	}
