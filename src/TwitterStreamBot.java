@@ -9,6 +9,9 @@ import twitter4j.conf.*;
 
 
 public class TwitterStreamBot {
+	
+	public static final String EVAL_URL = "www.student.computing.dcu.ie/~murphe74/evaluate_tweet.php";
+	
 	public static void main(String [] args)
 	{
 		//add a listener which listens for new tweets
@@ -22,8 +25,9 @@ public class TwitterStreamBot {
 				
 				String text;
 				//get the users twitter name who sent the tweet with the hashtag
-				String user = "@"+status.getUser().getScreenName();
+				String user = status.getUser().getScreenName();
 				long id = status.getId();
+				String usrEvalUrl = EVAL_URL+"?id="+id;
 				//get any quoted tweets ie. the user retweeted a tweet and then added the hashtag to it
 				Status quoted = status.getQuotedStatus();
 				//if their was a quoted tweet in it.
@@ -39,7 +43,7 @@ public class TwitterStreamBot {
 				}
 				
 				//print to the screen the user we just read and their message
-				System.out.println(user+"-"+text);
+				System.out.println("@"+user+"-"+text);
 				
 				//TODO:MOSES INTERFACE!
 				//interface with moses and send the text to be translated to english.
@@ -73,13 +77,15 @@ public class TwitterStreamBot {
 					Twitter twitter = new TwitterFactory(cb.build()).getInstance();
 					
 					//reply to the use with the translation
-					Status reply = twitter.updateStatus(user+" i hear you");
+					Status reply = twitter.updateStatus("@"+user+" i hear you");
 					System.out.println("Sent reply tweet:: "+reply);
 					//TODO:Add call to send direct message with link to user eval form
-					
-					
+					DirectMessage dm = twitter.sendDirectMessage(user,
+							"Sorry to bother you, Would you mind taking 10 seconds to evaluate"
+							+ " the translation you got via: "+usrEvalUrl);
+					System.out.println("Sent eval DM: "+dm);
 					PrintWriter pw = new PrintWriter(new FileOutputStream(new File("Data/recived.tweets"),true));
-					pw.println(user+"    "+id+"    "+text+"    "+translation);
+					pw.println("@"+user+"    "+id+"    "+text+"    "+translation);
 					pw.close();
 				}
 				catch(Exception e)
