@@ -7,6 +7,10 @@ import java.util.Properties;
 import twitter4j.*;
 import twitter4j.conf.*;
 
+//http://twitter4j.org/en/index.html#download
+//download the stable version of twitter4j.
+//then extract it to what ever folder
+//then you need to in eclipse add all the jar files in the lib folder to build path
 
 public class TwitterStreamBot {
 	
@@ -66,6 +70,7 @@ public class TwitterStreamBot {
 						System.exit(-1);
 					}
 					
+					/*
 					//build a new twitter api connection with our credentals
 					ConfigurationBuilder cb = new ConfigurationBuilder();
 					cb.setDebugEnabled(true)
@@ -87,6 +92,8 @@ public class TwitterStreamBot {
 					PrintWriter pw = new PrintWriter(new FileOutputStream(new File("Data/recived.tweets"),true));
 					pw.println("@"+user+"    "+id+"    "+text+"    "+translation);
 					pw.close();
+
+					*/
 				}
 				catch(Exception e)
 				{
