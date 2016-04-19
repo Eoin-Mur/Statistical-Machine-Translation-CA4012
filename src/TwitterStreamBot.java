@@ -1,16 +1,15 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
-
 import java.io.FileInputStream;
 import java.util.Properties;
+
 import twitter4j.*;
 import twitter4j.conf.*;
 
-//http://twitter4j.org/en/index.html#download
-//download the stable version of twitter4j.
-//then extract it to what ever folder
-//then you need to in eclipse add all the jar files in the lib folder to build path
 
 public class TwitterStreamBot {
 	
@@ -25,13 +24,16 @@ public class TwitterStreamBot {
 			//on reciving a status from our listener
 			public void onStatus(Status status)
 			{
+				InputStream std; 
+				InputStream err; 
+				
 				//System.out.println("@"+status.getUser().getScreenName()+"-"+status.getText());
 				
 				String text;
 				//get the users twitter name who sent the tweet with the hashtag
 				String user = status.getUser().getScreenName();
 				long id = status.getId();
-				String usrEvalUrl = EVAL_URL+"?id="+id;
+				String userEvalUrl = EVAL_URL + "?id="+id;
 				//get any quoted tweets ie. the user retweeted a tweet and then added the hashtag to it
 				Status quoted = status.getQuotedStatus();
 				//if their was a quoted tweet in it.
@@ -51,9 +53,53 @@ public class TwitterStreamBot {
 				
 				//TODO:MOSES INTERFACE!
 				//interface with moses and send the text to be translated to english.
+				String translation = "";
+				try {
+					//you need putty, plink and this code in the same folder
+					//add your username and password and name of your putty session ie "DCU Linux" to this command
+					//String command = "plink -load \"DCU Linux\" -l yourusername -pw yourpassword"; //this one works, just add your details (putty session, username password)
+					
+					//extra line for batch commands text file, can't get it working, 
+
+					//in the moses.ini file you need to specify the full path of the LM and phrase table
+					final String SH_SCRIPT = "/CA4012/twanslateES/SMT/sendTweet.sh '"+text+"'";
+					//String command = "plink -load \"DCU Linux\" -l yourusername -pw yourpassword -batch ";
+					
+					String command = "plink host -l usrname -pw password -batch "+SH_SCRIPT;
+						
+					System.out.println("Sending String for translation:\n\t"+text);
+
+					Runtime r = Runtime.getRuntime ();
+					Process p = r.exec (command);
+					//Process list = r.exec (command);
+					std = p.getInputStream ();
+					err = p.getErrorStream ();
+					p.waitFor();
+
+					//only need to read the first line as it will only return one line which is the translation
+					BufferedReader reader = new BufferedReader(new InputStreamReader(std));
+					translation = reader.readLine();	
+					//check if we recived a error from server
+					if(err.available() > 0)
+					{
+						int value = 0;
+						System.out.println("\nRecived Error From Server!");
+						while (err.available () > 0) {
+							value = err.read ();
+							System.out.print ((char) value);
+						}
+					}
+					//other wise print out our recived translation
+					else
+					{
+						System.out.println("\nRecived translation from server:\n\t"+translation);
+					}
+					p.destroy ();
+				}
+				catch (Exception e) {
+					e.printStackTrace ();
+				}
 				
-				String translation = text;//just use text untill we get the interface up.
-			
 				
 				try
 				{
@@ -70,7 +116,7 @@ public class TwitterStreamBot {
 						System.exit(-1);
 					}
 					
-					/*
+					
 					//build a new twitter api connection with our credentals
 					ConfigurationBuilder cb = new ConfigurationBuilder();
 					cb.setDebugEnabled(true)
@@ -82,18 +128,18 @@ public class TwitterStreamBot {
 					Twitter twitter = new TwitterFactory(cb.build()).getInstance();
 					
 					//reply to the use with the translation
-					Status reply = twitter.updateStatus("@"+user+" i hear you");
-					System.out.println("Sent reply tweet:: "+reply);
+					Status reply = twitter.updateStatus("@"+user+" "+translation);
+					System.out.println("Sent reply tweet::"+reply);
+					DirectMessage dm = twitter.sendDirectMessage(user, 
+							"Sorry to bother you,would you mind taking 10 seconds to evaluate "
+							+ "the translation you got via: "+userEvalUrl);
+					System.out.println("Sent eval DM::"+dm);
 					//TODO:Add call to send direct message with link to user eval form
-					DirectMessage dm = twitter.sendDirectMessage(user,
-							"Sorry to bother you, Would you mind taking 10 seconds to evaluate"
-							+ " the translation you got via: "+usrEvalUrl);
-					System.out.println("Sent eval DM: "+dm);
+					
+					
 					PrintWriter pw = new PrintWriter(new FileOutputStream(new File("Data/recived.tweets"),true));
 					pw.println("@"+user+"    "+id+"    "+text+"    "+translation);
 					pw.close();
-
-					*/
 				}
 				catch(Exception e)
 				{
