@@ -1,3 +1,5 @@
+package twanslateES;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -6,7 +8,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.FileInputStream;
 import java.util.Properties;
-
 import twitter4j.*;
 import twitter4j.conf.*;
 
@@ -30,6 +31,7 @@ public class TwitterStreamBot {
 				//System.out.println("@"+status.getUser().getScreenName()+"-"+status.getText());
 				
 				String text;
+				
 				//get the users twitter name who sent the tweet with the hashtag
 				String user = status.getUser().getScreenName();
 				long id = status.getId();
@@ -48,6 +50,8 @@ public class TwitterStreamBot {
 					text = status.getText();
 				}
 				
+				text = text.replace("#twanslate","");
+				
 				//print to the screen the user we just read and their message
 				System.out.println("@"+user+"-"+text);
 				
@@ -62,16 +66,19 @@ public class TwitterStreamBot {
 					//extra line for batch commands text file, can't get it working, 
 
 					//in the moses.ini file you need to specify the full path of the LM and phrase table
-					final String SH_SCRIPT = "/CA4012/twanslateES/SMT/sendTweet.sh '"+text+"'";
+					String SH_SCRIPT = "/CA4012/twanslateES/SMT/sendTweet.sh ' "+text+" ' ";
 					//String command = "plink -load \"DCU Linux\" -l yourusername -pw yourpassword -batch ";
 					
-					String command = "plink host -l usrname -pw password -batch "+SH_SCRIPT;
-						
+					//String command = "plink student.computing.dcu.ie -l sdasd -pw asdasda -batch "+SH_SCRIPT;
+					
+					String command = SH_SCRIPT;
 					System.out.println("Sending String for translation:\n\t"+text);
 
-					Runtime r = Runtime.getRuntime ();
-					Process p = r.exec (command);
-					//Process list = r.exec (command);
+					//Runtime r = Runtime.getRuntime ();
+					//Process p = r.exec (SH_SCRIPT);
+					
+					ProcessBuilder pb = new ProcessBuilder("/CA4012/twanslateES/SMT/sendTweet.sh", text);
+					Process p = pb.start();
 					std = p.getInputStream ();
 					err = p.getErrorStream ();
 					p.waitFor();
@@ -129,15 +136,15 @@ public class TwitterStreamBot {
 					
 					//reply to the use with the translation
 					Status reply = twitter.updateStatus("@"+user+" "+translation);
-					System.out.println("Sent reply tweet::"+reply);
+					System.out.println("Sent reply tweet::");
 					DirectMessage dm = twitter.sendDirectMessage(user, 
 							"Sorry to bother you,would you mind taking 10 seconds to evaluate "
 							+ "the translation you got via: "+userEvalUrl);
-					System.out.println("Sent eval DM::"+dm);
+					System.out.println("Sent eval DM::");
 					//TODO:Add call to send direct message with link to user eval form
 					
 					
-					PrintWriter pw = new PrintWriter(new FileOutputStream(new File("Data/recived.tweets"),true));
+					PrintWriter pw = new PrintWriter(new FileOutputStream(new File("/users/case4/murphe74/public_html/Data/recived.tweets"),true));
 					pw.println("@"+user+"    "+id+"    "+text+"    "+translation);
 					pw.close();
 				}
@@ -198,7 +205,7 @@ public class TwitterStreamBot {
 			//add out listener
 			twitterStream.addListener(listener);
 			//call the sample stream
-			twitterStream.filter("twanslate");
+			twitterStream.filter("#twanslate");
 			
 			//System.out.println("Crawling Tweets");
 		}
